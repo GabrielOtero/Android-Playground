@@ -2,6 +2,8 @@ package com.example.notes
 
 import android.app.Activity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -14,15 +16,18 @@ import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.notes.extensions.getCurrentTimestamp
 import com.example.notes.models.Note
 import com.example.notes.repository.NoteRepository
+import java.util.*
 
 class NoteActivity :
     AppCompatActivity(),
     View.OnTouchListener,
     GestureDetector.OnGestureListener,
     GestureDetector.OnDoubleTapListener,
-    View.OnClickListener {
+    View.OnClickListener,
+    TextWatcher{
 
     // ui components
     private lateinit var linedEditText: LinedEditText
@@ -32,7 +37,6 @@ class NoteActivity :
     private lateinit var backArrowContainer: RelativeLayout
     private lateinit var checkBtn: ImageButton
     private lateinit var arrowBtn: ImageButton
-
 
     // variables
     private var finalNote: Note = Note()
@@ -75,17 +79,27 @@ class NoteActivity :
     }
 
     private fun saveChanges(){
-        if(isNewNote){
-            saveNewNote()
-        }else{
+        var temp = linedEditText.text.toString()
+        temp = temp.replace("\n", "").replace(" ", "")
 
+        if(temp.isNotEmpty()){
+            finalNote.title = editTitle.text.toString()
+            finalNote.content = linedEditText.text.toString()
+            finalNote.timeStamp = Date().getCurrentTimestamp()
+            if(!finalNote.content.equals(initialNote.content) || !finalNote.title.equals(initialNote.content)){
+                saveNote()
+            }
         }
     }
 
-    private fun saveNewNote(){
-        noteRepository.insertNoteTask(finalNote)
+    private fun saveNote(){
+        if(isNewNote){
+            noteRepository.insertNoteTask(finalNote)
+        }else{
+            finalNote.id = initialNote.id
+            noteRepository.updateNote(finalNote)
+        }
     }
-
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -127,22 +141,11 @@ class NoteActivity :
 
         hideSoftKeyboard()
 
-        var temp = linedEditText.text.toString()
-        temp = temp.replace("\n", "")
-        temp = temp.replace(" ", "")
-
-        if(temp.isNotEmpty()){
-            finalNote.title = editTitle.text.toString()
-            finalNote.content = linedEditText.text.toString()
-            finalNote.timeStamp = "Jan 2019"
-            if(!finalNote.content.equals(initialNote.content) || !finalNote.title.equals(initialNote.content)){
-                saveChanges()
-            }
-        }
+        saveChanges()
     }
 
     //TODO: BUG: NOT HIDING:
-    //Enter Edit Mode, Press BackButton and the Press "Check" Button
+    //Enter Edit Mode, Press Back Button and the Press "Check" Button
     //Keyboard end up showed
     private fun hideSoftKeyboard() {
         val imm: InputMethodManager =
@@ -177,6 +180,7 @@ class NoteActivity :
         gestureDetector = GestureDetector(this, this)
 
         viewTitle.setOnClickListener(this)
+        editTitle.addTextChangedListener(this)
         checkBtn.setOnClickListener(this)
         arrowBtn.setOnClickListener(this)
 
@@ -269,5 +273,15 @@ class NoteActivity :
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun afterTextChanged(s: Editable?) {
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+    }
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+        viewTitle.text = s
     }
 }

@@ -52,13 +52,6 @@ class MainActivity : AppCompatActivity(), OnNoteListener, View.OnClickListener {
 
     }
 
-
-    fun insertFakeNotes() {
-        for (i in 0..15) {
-            notes.add(Note("Title #$i", "Content #$i", "$i jan 2019"))
-        }
-    }
-
     fun initRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = NotesRecyclerAdapter(notes, this)
@@ -78,6 +71,7 @@ class MainActivity : AppCompatActivity(), OnNoteListener, View.OnClickListener {
     }
 
     private fun deleteNote(note: Note) {
+        noteRepository.deleteNote(note)
         notes.remove(note)
         recyclerView.adapter?.notifyDataSetChanged()
     }

@@ -13,8 +13,8 @@ interface NoteDao{
     fun getNotes() : LiveData<List<Note>>
 
     @Delete
-    fun deleteNotes(vararg note : Note) : Int
+    fun deleteNotes(vararg note : Note?) : Int
 
     @Update
-    fun updateNote(vararg note : Note) : Int
+    fun updateNote(vararg note : Note?) : Int
 }
