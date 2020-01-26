@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -12,12 +13,15 @@ import com.example.notes.adapter.NotesRecyclerAdapter
 import com.example.notes.adapter.OnNoteListener
 import com.example.notes.extensions.VerticalSpacingItemDecorator
 import com.example.notes.models.Note
+import com.example.notes.repository.NoteRepository
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity(), OnNoteListener, View.OnClickListener {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var noteRepository: NoteRepository
+
     private var notes = ArrayList<Note>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,14 +30,28 @@ class MainActivity : AppCompatActivity(), OnNoteListener, View.OnClickListener {
 
         recyclerView = findViewById(R.id.recycler_view)
 
-        insertFakeNotes()
+        noteRepository = NoteRepository(this)
+        retrieveNotes()
+//        insertFakeNotes()
         initRecyclerView()
-        val toolbar = findViewById<Toolbar>(R.id.notes_toolbar)
 
+        val toolbar = findViewById<Toolbar>(R.id.notes_toolbar)
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener(this)
         setSupportActionBar(toolbar)
         title = "Notes"
     }
+
+    private fun retrieveNotes() {
+        noteRepository.retrieveNotesTask().observe(this, Observer { notesDb ->
+            if (notesDb.isNotEmpty()) {
+                notes.clear()
+                notes.addAll(notesDb)
+            }
+            recyclerView.adapter?.notifyDataSetChanged()
+        })
+
+    }
+
 
     fun insertFakeNotes() {
         for (i in 0..15) {

@@ -2,7 +2,6 @@ package com.example.notes
 
 import android.app.Activity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -16,6 +15,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.notes.models.Note
+import com.example.notes.repository.NoteRepository
 
 class NoteActivity :
     AppCompatActivity(),
@@ -35,10 +35,13 @@ class NoteActivity :
 
 
     // variables
-    private lateinit var initialNote: Note
+    private var finalNote: Note = Note()
+    private var initialNote: Note = Note()
+
     private lateinit var gestureDetector: GestureDetector
     private var isNewNote: Boolean = false
     private var mode: Int = 0
+    var noteRepository: NoteRepository = NoteRepository(this)
 
     companion object {
         private const val EDIT_MODE_ENABLED = 1
@@ -63,14 +66,26 @@ class NoteActivity :
             setNewNoteProperites()
             enableEditMode()
         } else {
-            initialNote =
-                if (intent.hasExtra("selected_note")) intent.getParcelableExtra("selected_note") else Note()
+            initialNote = intent.getParcelableExtra("selected_note") ?: Note()
             setNoteProperties()
             disableContentInteraction()
         }
 
         setListeners()
     }
+
+    private fun saveChanges(){
+        if(isNewNote){
+            saveNewNote()
+        }else{
+
+        }
+    }
+
+    private fun saveNewNote(){
+        noteRepository.insertNoteTask(finalNote)
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -80,7 +95,7 @@ class NoteActivity :
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         mode = savedInstanceState.getInt("mode")
-        if(mode == EDIT_MODE_ENABLED){
+        if (mode == EDIT_MODE_ENABLED) {
             enableEditMode()
         }
     }
@@ -111,18 +126,36 @@ class NoteActivity :
         disableContentInteraction()
 
         hideSoftKeyboard()
+
+        var temp = linedEditText.text.toString()
+        temp = temp.replace("\n", "")
+        temp = temp.replace(" ", "")
+
+        if(temp.isNotEmpty()){
+            finalNote.title = editTitle.text.toString()
+            finalNote.content = linedEditText.text.toString()
+            finalNote.timeStamp = "Jan 2019"
+            if(!finalNote.content.equals(initialNote.content) || !finalNote.title.equals(initialNote.content)){
+                saveChanges()
+            }
+        }
     }
 
+    //TODO: BUG: NOT HIDING:
+    //Enter Edit Mode, Press BackButton and the Press "Check" Button
+    //Keyboard end up showed
     private fun hideSoftKeyboard() {
-        val imm: InputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm: InputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         if (imm.isActive)
-            imm. toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0)
+            imm.toggleSoftInput(InputMethodManager.HIDE_NOT_ALWAYS, 0)
     }
 
     private fun showSoftKeyboard() {
-        val imm: InputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm: InputMethodManager =
+            getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         if (imm.isActive)
-            imm. toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
     }
 
     private fun setNoteProperties() {
@@ -134,6 +167,9 @@ class NoteActivity :
     private fun setNewNoteProperites() {
         viewTitle.text = "Note Title"
         editTitle.setText("Note Title")
+
+        initialNote.title = "Note Title"
+        finalNote.title = "Note Title"
     }
 
     private fun setListeners() {
