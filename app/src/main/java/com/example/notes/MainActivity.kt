@@ -1,94 +1,54 @@
 package com.example.notes
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.util.Log
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.notes.adapter.NotesRecyclerAdapter
-import com.example.notes.adapter.OnNoteListener
-import com.example.notes.extensions.VerticalSpacingItemDecorator
-import com.example.notes.models.Note
-import com.example.notes.repository.NoteRepository
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
-
-class MainActivity : AppCompatActivity(), OnNoteListener, View.OnClickListener {
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var noteRepository: NoteRepository
-
-    private var notes = ArrayList<Note>()
+class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        recyclerView = findViewById(R.id.recycler_view)
-
-        noteRepository = NoteRepository(this)
-        retrieveNotes()
-//        insertFakeNotes()
-        initRecyclerView()
-
-        val toolbar = findViewById<Toolbar>(R.id.notes_toolbar)
-        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener(this)
+        val toolbar = findViewById<Toolbar>(R.id.main_toolbar)
         setSupportActionBar(toolbar)
-        title = "Notes"
+
+        val navController = findNavController(R.id.nav_host_fragment)
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+            )
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
+        navView.setOnNavigationItemSelectedListener(this)
+
     }
 
-    private fun retrieveNotes() {
-        noteRepository.retrieveNotesTask().observe(this, Observer { notesDb ->
-            if (notesDb.isNotEmpty()) {
-                notes.clear()
-                notes.addAll(notesDb)
+    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+        return when (p0.itemId) {
+            R.id.navigation_home -> {
+                Log.d("NAVIGATION", "HOME")
+                true
             }
-            recyclerView.adapter?.notifyDataSetChanged()
-        })
-
-    }
-
-    fun initRecyclerView() {
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = NotesRecyclerAdapter(notes, this)
-        recyclerView.addItemDecoration(VerticalSpacingItemDecorator(10))
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView)
-    }
-
-    override fun onNoteClick(position: Int) {
-        val intent = Intent(this, NoteActivity::class.java)
-        intent.putExtra("selected_note", notes[position])
-        startActivity(intent)
-    }
-
-    override fun onClick(v: View?) {
-        val intent = Intent(this, NoteActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun deleteNote(note: Note) {
-        noteRepository.deleteNote(note)
-        notes.remove(note)
-        recyclerView.adapter?.notifyDataSetChanged()
-    }
-
-    val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-        0, ItemTouchHelper.RIGHT
-    ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            return false
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            deleteNote(notes[viewHolder.adapterPosition])
+            R.id.navigation_dashboard -> {
+                Log.d("NAVIGATION", "DASHBOARD")
+                true
+            }
+            R.id.navigation_notifications -> {
+                Log.d("NAVIGATION", "NOTIFICATION")
+                true
+            }
+            else -> false
         }
     }
+
 }

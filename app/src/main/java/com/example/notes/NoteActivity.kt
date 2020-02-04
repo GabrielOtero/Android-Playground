@@ -125,7 +125,7 @@ class NoteActivity :
 
         enableContentInteraction()
 
-        showSoftKeyboard()
+//        showSoftKeyboard()
     }
 
     private fun disableEditMode() {
@@ -139,7 +139,7 @@ class NoteActivity :
 
         disableContentInteraction()
 
-        hideSoftKeyboard()
+//        hideSoftKeyboard()
 
         saveChanges()
     }
