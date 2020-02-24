@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         val navController = findNavController(R.id.nav_host_fragment)
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_recipes, R.id.navigation_dashboard, R.id.navigation_notifications
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -34,16 +34,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     }
 
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
         return when (p0.itemId) {
-            R.id.navigation_home -> {
+            R.id.navigation_recipes -> {
+                navController.navigate(R.id.navigation_recipes)
                 Log.d("NAVIGATION", "HOME")
                 true
             }
             R.id.navigation_dashboard -> {
+                navController.navigate(R.id.navigation_dashboard)
                 Log.d("NAVIGATION", "DASHBOARD")
                 true
             }
             R.id.navigation_notifications -> {
+                navController.navigate(R.id.navigation_notifications)
                 Log.d("NAVIGATION", "NOTIFICATION")
                 true
             }

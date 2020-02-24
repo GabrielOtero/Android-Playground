@@ -1,34 +1,44 @@
-package com.example.notes
+package com.example.notes.ui.home
 
 import android.os.Bundle
-import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.notes.R
 import com.example.notes.adapter.OnRecipeListener
 import com.example.notes.adapter.RecipeRecyclerAdapter
 import com.example.notes.models.Recipe
 import com.example.notes.viewmodels.RecipeListViewModel
 import kotlinx.android.synthetic.main.activity_recipes_list.*
 
-class RecipeListActivity : BaseActivity(), OnRecipeListener {
-    private var recipeListViewModel: RecipeListViewModel = RecipeListViewModel()
-    private lateinit var adapter : RecipeRecyclerAdapter
+class RecipeListFragment : Fragment(), OnRecipeListener {
 
+    private lateinit var recipeListViewModel: RecipeListViewModel
+    private lateinit var adapter: RecipeRecyclerAdapter
 
-    companion object {
-        const val TAG: String = "RecipeListActivity"
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        recipeListViewModel =
+            ViewModelProviders.of(this).get(RecipeListViewModel::class.java)
+        return inflater.inflate(R.layout.fragment_recipes_list, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_recipes_list)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
         subscribeObservers()
         searchRecipesApi("chicken", 1)
     }
 
     private fun subscribeObservers() {
-        recipeListViewModel.recipes.observe(this,
+        recipeListViewModel.recipes.observe(viewLifecycleOwner,
             Observer<List<Recipe>> { recipes ->
                 adapter.recipes = recipes
             })
@@ -37,7 +47,7 @@ class RecipeListActivity : BaseActivity(), OnRecipeListener {
     private fun initRecyclerView() {
         adapter = RecipeRecyclerAdapter(this)
         recipe_list.adapter = adapter
-        recipe_list.layoutManager = LinearLayoutManager(this)
+        recipe_list.layoutManager = LinearLayoutManager(context)
     }
 
     private fun searchRecipesApi(query: String, pageNumber: Int) {

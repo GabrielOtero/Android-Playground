@@ -11,4 +11,6 @@ class UpdateAsyncTask(var noteDao : NoteDao) : AsyncTask<Note, Void, Void>() {
         noteDao.updateNote(*notes)
         return null
     }
+
+
 }
