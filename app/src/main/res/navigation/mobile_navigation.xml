@@ -8,13 +8,13 @@
     <fragment
         android:id="@+id/navigation_recipes"
         android:name="com.example.notes.ui.home.RecipeListFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_recipes_list" />
+        android:label="@string/title_recipes"
+        tools:layout="@layout/fragment_recipes_list"/>
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.notes.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/title_cryptos"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment

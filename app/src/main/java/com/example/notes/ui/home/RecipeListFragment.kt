@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,7 +18,7 @@ import kotlinx.android.synthetic.main.activity_recipes_list.*
 
 class RecipeListFragment : Fragment(), OnRecipeListener {
 
-    private lateinit var recipeListViewModel: RecipeListViewModel
+    private lateinit var viewModel: RecipeListViewModel
     private lateinit var adapter: RecipeRecyclerAdapter
 
     override fun onCreateView(
@@ -25,7 +26,7 @@ class RecipeListFragment : Fragment(), OnRecipeListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        recipeListViewModel =
+        viewModel =
             ViewModelProviders.of(this).get(RecipeListViewModel::class.java)
         return inflater.inflate(R.layout.fragment_recipes_list, container, false)
     }
@@ -34,11 +35,13 @@ class RecipeListFragment : Fragment(), OnRecipeListener {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
         subscribeObservers()
-        searchRecipesApi("chicken", 1)
+        initSearchView()
+        if(!viewModel.isViewingRecipes){
+            displaySearchCategories()
+        }
     }
-
     private fun subscribeObservers() {
-        recipeListViewModel.recipes.observe(viewLifecycleOwner,
+        viewModel.recipes.observe(viewLifecycleOwner,
             Observer<List<Recipe>> { recipes ->
                 adapter.recipes = recipes
             })
@@ -51,7 +54,28 @@ class RecipeListFragment : Fragment(), OnRecipeListener {
     }
 
     private fun searchRecipesApi(query: String, pageNumber: Int) {
-        recipeListViewModel.searchRecipesApi(query, pageNumber)
+        viewModel.searchRecipesApi(query, pageNumber)
+    }
+
+    private fun initSearchView() {
+        val searchView: SearchView? = activity?.findViewById<SearchView>(R.id.search_view)
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { searchRecipesApi(it, 1) }
+                adapter.displayLoading()
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+
+        })
+    }
+
+    fun displaySearchCategories(){
+        viewModel.isViewingRecipes = false
+        adapter.displaySearchCategories()
     }
 
     override fun onRecipeClick(posistion: Int) {
@@ -59,6 +83,7 @@ class RecipeListFragment : Fragment(), OnRecipeListener {
     }
 
     override fun onCategoryClick(category: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        adapter.displayLoading()
+        viewModel.searchRecipesApi(category, 1)
     }
 }
