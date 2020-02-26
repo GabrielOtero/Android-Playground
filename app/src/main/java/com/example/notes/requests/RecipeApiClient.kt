@@ -31,6 +31,10 @@ object RecipeApiClient {
         }, NETWORK_TIMEOUT, TimeUnit.MILLISECONDS)
     }
 
+    fun cancelRequest() {
+        retrieveRecipesRunnable?.cancelRequest
+    }
+
 
     private class RetrieveRecipesRunnable(
         var query: String,

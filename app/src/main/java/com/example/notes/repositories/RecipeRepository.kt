@@ -10,4 +10,8 @@ object RecipeRepository {
     fun searchRecipesApi(query: String, pageNumber : Int){
         RecipeApiClient.searchRecipesApi(query, pageNumber)
     }
+
+    fun cancelRequest(){
+        RecipeApiClient.cancelRequest()
+    }
 }

@@ -86,7 +86,6 @@ class RecipeRecyclerAdapter(var onRecipeListener: OnRecipeListener) :
             Glide.with(holder.itemView.context).setDefaultRequestOptions(requestOptions)
                 .load(path).into((holder as CategoryViewHolder).categoryImage)
             holder.categoryTitle.text = recipes[position].title
-
         }
     }
 
